@@ -28,13 +28,10 @@ export interface BackgroundTask {
   progress?: TaskProgress
   parentModel?: { providerID: string; modelID: string }
   model?: { providerID: string; modelID: string }
-  /** Agent name used for concurrency tracking */
   concurrencyKey?: string
-  /** Parent session's agent name for notification */
+  useRateLimitManager?: boolean
   parentAgent?: string
-  /** Last message count for stability detection */
   lastMsgCount?: number
-  /** Number of consecutive polls with stable message count */
   stablePolls?: number
 }
 

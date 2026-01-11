@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh My OpenCode | User Manual</title>
+    <style>
+        :root {
+            --bg-dark: #0f1117;
+            --bg-card: #1e222d;
+            --primary: #8b5cf6; /* Violet */
+            --secondary: #06b6d4; /* Cyan */
+            --accent: #f43f5e; /* Rose */
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --code-bg: #111;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--primary);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            margin-bottom: 20px;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-color: var(--primary);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            stroke: var(--secondary);
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #a5b4fc;
+            border: 1px solid #333;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: '$';
+            position: absolute;
+            left: 10px;
+            color: #555;
+            user-select: none;
+        }
+
+        .code-block code {
+            padding-left: 15px;
+            display: block;
+        }
+
+        .keyword {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Feature List */
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        li svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--primary);
+        }
+
+        /* Magic Section */
+        .magic-section {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            text-align: center;
+            padding: 60px;
+            border-radius: 24px;
+            margin-bottom: 60px;
+        }
+
+        .magic-word {
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+            font-family: monospace;
+            letter-spacing: -3px;
+        }
+
+        /* Agent Roster */
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .agent-card {
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .agent-name {
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .agent-role {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 100px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            padding-top: 40px;
+        }
+
+        .heart {
+            color: var(--accent);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="badge">VERSION 3.0.0-BETA</div>
+        <h1>Oh My OpenCode</h1>
+        <div class="subtitle">Coding on Steroids.</div>
+    </header>
+
+    <!-- 1. The Magic Way -->
+    <div class="magic-section">
+        <h2>✨ The One Command to Rule Them All</h2>
+        <p>Don't want to learn the manual? Just remember this word.</p>
+        <div class="magic-word">ultrawork</div>
+        <p>Or just <code>ulw</code> for short.</p>
+        <div class="code-block" style="display:inline-block; text-align:left; min-width: 400px;">
+            <code>Refactor the auth module <span class="keyword">ultrawork</span></code>
+        </div>
+        <p style="margin-top: 20px; font-size: 0.9rem;">
+            Sisyphus will automatically:<br>
+            • Analyze structure • Fire background researchers • Plan execution • Implement • Verify
+        </p>
+    </div>
+
+    <!-- 2. Modes -->
+    <div class="grid">
+        <div class="card">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Discovery Mode
+            </h2>
+            <p>Perfect for exploring a new codebase or checking patterns.</p>
+            <div class="code-block">
+                <code>How does auth work? <span class="keyword">search</span></code>
+            </div>
+            <ul>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Launches <b>Explore</b> agent (Grep/AST)</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Launches <b>Librarian</b> (Docs/Refs)</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Runs in parallel background tasks</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                Deep Analysis
+            </h2>
+            <p>For complex architecture questions or debugging.</p>
+            <div class="code-block">
+                <code>Why is the build failing? <span class="keyword">analyze</span></code>
+            </div>
+            <ul>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Consults <b>Oracle</b> (GPT-5.2)</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Synthesizes multiple files</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Provides strategic guidance</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                Ralph Loop
+            </h2>
+            <p>Infinite recursion loop for autonomous implementation.</p>
+            <div class="code-block">
+                <code>/ralph-loop "Migrate to TS"</code>
+            </div>
+            <ul>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Runs until promise satisfied</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Auto-recovers from errors</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Supports 100+ iterations</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 3. The Team -->
+    <h2 style="margin-bottom: 30px;">Meet Your Team</h2>
+    <div class="agent-grid">
+        <div class="agent-card">
+            <span class="agent-name">@sisyphus</span>
+            <span class="agent-role">Orchestrator (Claude Opus)</span>
+        </div>
+        <div class="agent-card">
+            <span class="agent-name">@oracle</span>
+            <span class="agent-role">Architect (GPT-5.2)</span>
+        </div>
+        <div class="agent-card">
+            <span class="agent-name">@librarian</span>
+            <span class="agent-role">Researcher (Sonnet 3.5)</span>
+        </div>
+        <div class="agent-card">
+            <span class="agent-name">@explore</span>
+            <span class="agent-role">Grep Specialist (Grok)</span>
+        </div>
+        <div class="agent-card">
+            <span class="agent-name">@frontend</span>
+            <span class="agent-role">UI/UX (Gemini 3 Pro)</span>
+        </div>
+    </div>
+    
+    <div style="margin-top: 20px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+        You can mention them directly: <code>"Ask @oracle to review this PR"</code>
+    </div>
+
+    <!-- 4. Advanced Tools -->
+    <h2 style="margin-top: 60px; margin-bottom: 30px;">Power Tools</h2>
+    <div class="grid">
+        <div class="card">
+            <h3>LSP Integration</h3>
+            <p>Full IDE intelligence in the terminal.</p>
+            <div class="code-block">
+                <code>lsp_hover(file, line, char)<br>lsp_rename(file, old, new)</code>
+            </div>
+        </div>
+        <div class="card">
+            <h3>AST-Grep</h3>
+            <p>Structural search and replace.</p>
+            <div class="code-block">
+                <code>ast_grep_replace(pattern="console.log($A)", rewrite="logger.info($A)")</code>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Background Tasks</h3>
+            <p>Parallel execution engine.</p>
+            <div class="code-block">
+                <code>sisyphus_task(agent="explore", prompt="Find X", run_in_bg=true)</code>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Made with <span class="heart">♥</span> by <a href="https://github.com/code-yeongyu/oh-my-opencode" style="color:var(--text-main); text-decoration:none;">code-yeongyu</a></p>
+        <p>Enjoy coding on steroids.</p>
+    </div>
+</div>
+
+</body>
+</html>

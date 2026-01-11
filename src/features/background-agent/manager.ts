@@ -7,7 +7,8 @@ import type {
 } from "./types"
 import { log } from "../../shared/logger"
 import { ConcurrencyManager } from "./concurrency"
-import type { BackgroundTaskConfig } from "../../config/schema"
+import { RateLimitManager } from "../rate-limit-manager"
+import type { BackgroundTaskConfig, RateLimitConfig } from "../../config/schema"
 
 import { subagentSessions } from "../claude-code-session-state"
 import { getTaskToastManager } from "../task-toast-manager"
@@ -44,19 +45,33 @@ interface Todo {
 export class BackgroundManager {
   private tasks: Map<string, BackgroundTask>
   private notifications: Map<string, BackgroundTask[]>
-  private pendingByParent: Map<string, Set<string>>  // Track pending tasks per parent for batching
+  private pendingByParent: Map<string, Set<string>>
   private client: OpencodeClient
   private directory: string
   private pollingInterval?: ReturnType<typeof setInterval>
   private concurrencyManager: ConcurrencyManager
+  private rateLimitManager?: RateLimitManager
 
-  constructor(ctx: PluginInput, config?: BackgroundTaskConfig) {
+  constructor(ctx: PluginInput, config?: BackgroundTaskConfig, rateLimitConfig?: RateLimitConfig) {
     this.tasks = new Map()
     this.notifications = new Map()
     this.pendingByParent = new Map()
     this.client = ctx.client
     this.directory = ctx.directory
     this.concurrencyManager = new ConcurrencyManager(config)
+    if (rateLimitConfig) {
+      this.rateLimitManager = new RateLimitManager(rateLimitConfig)
+    }
+  }
+
+  private releaseTaskSlot(task: BackgroundTask): void {
+    if (!task.concurrencyKey) return
+    
+    if (task.useRateLimitManager && this.rateLimitManager) {
+      this.rateLimitManager.release(task.concurrencyKey)
+    } else {
+      this.concurrencyManager.release(task.concurrencyKey)
+    }
   }
 
   async launch(input: LaunchInput): Promise<BackgroundTask> {
@@ -71,9 +86,24 @@ export class BackgroundManager {
       throw new Error("Agent parameter is required")
     }
 
-    const concurrencyKey = input.agent
+    const modelKey = input.model 
+      ? `${input.model.providerID}/${input.model.modelID}` 
+      : undefined
+    const concurrencyKey = modelKey ?? input.agent
 
-    await this.concurrencyManager.acquire(concurrencyKey)
+    if (modelKey && this.rateLimitManager) {
+      await this.rateLimitManager.acquire(modelKey)
+    } else {
+      await this.concurrencyManager.acquire(concurrencyKey)
+    }
+
+    const releaseSlot = () => {
+      if (modelKey && this.rateLimitManager) {
+        this.rateLimitManager.release(modelKey)
+      } else {
+        this.concurrencyManager.release(concurrencyKey)
+      }
+    }
 
     const createResult = await this.client.session.create({
       body: {
@@ -81,12 +111,12 @@ export class BackgroundManager {
         title: `Background: ${input.description}`,
       },
     }).catch((error) => {
-      this.concurrencyManager.release(concurrencyKey)
+      releaseSlot()
       throw error
     })
 
     if (createResult.error) {
-      this.concurrencyManager.release(concurrencyKey)
+      releaseSlot()
       throw new Error(`Failed to create background session: ${createResult.error}`)
     }
 
@@ -111,6 +141,7 @@ export class BackgroundManager {
       parentAgent: input.parentAgent,
       model: input.model,
       concurrencyKey,
+      useRateLimitManager: !!(modelKey && this.rateLimitManager),
     }
 
     this.tasks.set(task.id, task)
@@ -168,9 +199,7 @@ export class BackgroundManager {
           existingTask.error = errorMessage
         }
         existingTask.completedAt = new Date()
-        if (existingTask.concurrencyKey) {
-          this.concurrencyManager.release(existingTask.concurrencyKey)
-        }
+        this.releaseTaskSlot(existingTask)
         this.markForNotification(existingTask)
         this.notifyParentSession(existingTask).catch(err => {
           log("[background-agent] Failed to notify on error:", err)
@@ -426,9 +455,7 @@ export class BackgroundManager {
         task.error = "Session deleted"
       }
 
-      if (task.concurrencyKey) {
-        this.concurrencyManager.release(task.concurrencyKey)
-      }
+      this.releaseTaskSlot(task)
       this.tasks.delete(task.id)
       this.clearNotificationsForTask(task.id)
       subagentSessions.delete(sessionID)
@@ -641,10 +668,8 @@ Use \`background_output(task_id="${task.id}")\` to retrieve this result when rea
     // Cleanup after retention period
     const taskId = task.id
     setTimeout(() => {
-      if (task.concurrencyKey) {
-        this.concurrencyManager.release(task.concurrencyKey)
-        task.concurrencyKey = undefined
-      }
+      this.releaseTaskSlot(task)
+      task.concurrencyKey = undefined
       this.clearNotificationsForTask(taskId)
       this.tasks.delete(taskId)
       log("[background-agent] Removed completed task from memory:", taskId)
@@ -682,9 +707,7 @@ Use \`background_output(task_id="${task.id}")\` to retrieve this result when rea
         task.status = "error"
         task.error = "Task timed out after 30 minutes"
         task.completedAt = new Date()
-        if (task.concurrencyKey) {
-          this.concurrencyManager.release(task.concurrencyKey)
-        }
+        this.releaseTaskSlot(task)
         this.clearNotificationsForTask(taskId)
         this.tasks.delete(taskId)
         subagentSessions.delete(task.sessionID)

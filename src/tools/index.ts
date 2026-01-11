@@ -50,7 +50,10 @@ type OpencodeClient = PluginInput["client"]
 
 export { createCallOmoAgent } from "./call-omo-agent"
 export { createLookAt } from "./look-at"
+export { createSupermemoryTool } from "./supermemory"
+import { rateLimitStatsTool } from "./rate-limit-stats"
 export { createSisyphusTask, type SisyphusTaskToolOptions, DEFAULT_CATEGORIES, CATEGORY_PROMPT_APPENDS } from "./sisyphus-task"
+export { createSpawnAgent, type SpawnAgentToolOptions } from "./spawn-agent"
 
 export function createBackgroundTools(manager: BackgroundManager, client: OpencodeClient): Record<string, ToolDefinition> {
   return {
@@ -79,4 +82,5 @@ export const builtinTools: Record<string, ToolDefinition> = {
   session_read,
   session_search,
   session_info,
+  rate_limit_stats: rateLimitStatsTool,
 }

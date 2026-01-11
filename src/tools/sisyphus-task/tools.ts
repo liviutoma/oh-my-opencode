@@ -115,7 +115,7 @@ export function createSisyphusTask(options: SisyphusTaskToolOptions): ToolDefini
   const { manager, client, userCategories, gitMasterConfig } = options
 
   return tool({
-    description: SISYPHUS_TASK_DESCRIPTION,
+    description: `[DEPRECATED: Use spawn_agent instead] ${SISYPHUS_TASK_DESCRIPTION}`,
     args: {
       description: tool.schema.string().describe("Short task description"),
       prompt: tool.schema.string().describe("Full detailed prompt for the agent"),

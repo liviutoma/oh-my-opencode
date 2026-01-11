@@ -555,8 +555,10 @@ Hand your best tools to your best colleagues. Now they can properly refactor, na
 - **lsp_code_action_resolve**: Apply code action
 - **ast_grep_search**: AST-aware code pattern search (25 languages)
 - **ast_grep_replace**: AST-aware code replacement
-- **call_omo_agent**: Spawn specialized explore/librarian agents. Supports `run_in_background` parameter for async execution.
-- **sisyphus_task**: Category-based task delegation with specialized agents. Supports pre-configured categories (visual, business-logic) or direct agent targeting. Use `background_output` to retrieve results and `background_cancel` to cancel tasks. See [Categories](#categories).
+- **spawn_agent**: Unified tool for spawning agents (replacing sisyphus_task and call_omo_agent). Supports custom system prompts, provider/model selection, background/sync execution, priority queues, and rate limiting.
+- **call_omo_agent**: [DEPRECATED] Spawn specialized explore/librarian agents. Use `spawn_agent` instead.
+- **sisyphus_task**: [DEPRECATED] Category-based task delegation. Use `spawn_agent` instead.
+
 
 #### Session Management
 
@@ -1022,34 +1024,33 @@ You can also customize Sisyphus agents like other agents:
 | `planner_enabled`         | `true`  | When `true`, enables Prometheus (Planner) agent with work-planner methodology. Enabled by default.                                     |
 | `replace_plan`            | `true`  | When `true`, demotes default plan agent to subagent mode. Set to `false` to keep both Prometheus (Planner) and default plan available. |
 
-### Background Tasks
+### Rate Limiting & Concurrency
 
-Configure concurrency limits for background agent tasks. This controls how many parallel background agents can run simultaneously.
+Configure concurrency limits for background tasks.
+- **rate_limit**: (Recommended) Fine-grained control for `spawn_agent` and model-based tasks.
+- **background_task**: (Legacy) Simple concurrency limits for legacy tools.
 
 ```json
 {
-  "background_task": {
+  "rate_limit": {
+    "enabled": true,
     "defaultConcurrency": 5,
-    "providerConcurrency": {
+    "providerLimits": {
       "anthropic": 3,
-      "openai": 5,
       "google": 10
     },
-    "modelConcurrency": {
-      "anthropic/claude-opus-4-5": 2,
-      "google/gemini-3-flash": 10
-    }
+    "modelLimits": {
+      "anthropic/claude-opus-4-5": 2
+    },
+    "queueTimeout": 300000
+  },
+  "background_task": {
+    "defaultConcurrency": 5
   }
 }
 ```
 
-| Option                | Default | Description                                                                                                             |
-| --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `defaultConcurrency`  | -       | Default maximum concurrent background tasks for all providers/models                                                    |
-| `providerConcurrency` | -       | Per-provider concurrency limits. Keys are provider names (e.g., `anthropic`, `openai`, `google`)                        |
-| `modelConcurrency`    | -       | Per-model concurrency limits. Keys are full model names (e.g., `anthropic/claude-opus-4-5`). Overrides provider limits. |
-
-**Priority Order**: `modelConcurrency` > `providerConcurrency` > `defaultConcurrency`
+**Priority Order**: `modelLimits` > `providerLimits` > `defaultConcurrency`
 
 **Use Cases**:
 - Limit expensive models (e.g., Opus) to prevent cost spikes
@@ -1058,7 +1059,7 @@ Configure concurrency limits for background agent tasks. This controls how many 
 
 ### Categories
 
-Categories enable domain-specific task delegation via the `sisyphus_task` tool. Each category pre-configures a specialized `Sisyphus-Junior-{category}` agent with optimized model settings and prompts.
+Categories enable domain-specific task delegation via the `spawn_agent` tool (and legacy `sisyphus_task`). Each category pre-configures a specialized `Sisyphus-Junior-{category}` agent with optimized model settings and prompts.
 
 **Default Categories:**
 
@@ -1070,12 +1071,15 @@ Categories enable domain-specific task delegation via the `sisyphus_task` tool. 
 **Usage:**
 
 ```
-// Via sisyphus_task tool
-sisyphus_task(category="visual", prompt="Create a responsive dashboard component")
-sisyphus_task(category="business-logic", prompt="Design the payment processing flow")
+// Via spawn_agent tool (Recommended)
+spawn_agent(category="visual", prompt="Create a responsive dashboard component", run_in_background=false)
+spawn_agent(category="business-logic", prompt="Design the payment processing flow", run_in_background=true)
 
 // Or target a specific agent directly
-sisyphus_task(agent="oracle", prompt="Review this architecture")
+spawn_agent(base_agent="oracle", prompt="Review this architecture", run_in_background=false)
+
+// Legacy sisyphus_task usage
+sisyphus_task(category="visual", prompt="Create a responsive dashboard component")
 ```
 
 **Custom Categories:**

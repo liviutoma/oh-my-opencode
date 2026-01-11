@@ -285,6 +285,14 @@ export const BackgroundTaskConfigSchema = z.object({
   modelConcurrency: z.record(z.string(), z.number().min(1)).optional(),
 })
 
+export const RateLimitConfigSchema = z.object({
+  enabled: z.boolean().default(true),
+  defaultConcurrency: z.number().min(1).default(5),
+  providerLimits: z.record(z.string(), z.number().min(1)).optional(),
+  modelLimits: z.record(z.string(), z.number().min(1)).optional(),
+  queueTimeout: z.number().min(1000).default(300000),
+})
+
 export const NotificationConfigSchema = z.object({
   /** Force enable session-notification even if external notification plugins are detected (default: false) */
   force_enable: z.boolean().optional(),
@@ -315,8 +323,10 @@ export const OhMyOpenCodeConfigSchema = z.object({
   skills: SkillsConfigSchema.optional(),
   ralph_loop: RalphLoopConfigSchema.optional(),
   background_task: BackgroundTaskConfigSchema.optional(),
+  rate_limit: RateLimitConfigSchema.optional(),
   notification: NotificationConfigSchema.optional(),
   git_master: GitMasterConfigSchema.optional(),
+  supermemory_api_key: z.string().optional(),
 })
 
 export type OhMyOpenCodeConfig = z.infer<typeof OhMyOpenCodeConfigSchema>
@@ -335,6 +345,7 @@ export type SkillsConfig = z.infer<typeof SkillsConfigSchema>
 export type SkillDefinition = z.infer<typeof SkillDefinitionSchema>
 export type RalphLoopConfig = z.infer<typeof RalphLoopConfigSchema>
 export type NotificationConfig = z.infer<typeof NotificationConfigSchema>
+export type RateLimitConfig = z.infer<typeof RateLimitConfigSchema>
 export type CategoryConfig = z.infer<typeof CategoryConfigSchema>
 export type CategoriesConfig = z.infer<typeof CategoriesConfigSchema>
 export type BuiltinCategoryName = z.infer<typeof BuiltinCategoryNameSchema>
