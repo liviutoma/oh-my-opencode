@@ -47,7 +47,7 @@ type ToolContextWithMetadata = {
 
 export function createBackgroundTask(manager: BackgroundManager): ToolDefinition {
   return tool({
-    description: BACKGROUND_TASK_DESCRIPTION,
+    description: `[DEPRECATED: Use spawn_agent instead] ${BACKGROUND_TASK_DESCRIPTION}`,
     args: {
       description: tool.schema.string().describe("Short task description (shown in status)"),
       prompt: tool.schema.string().describe("Full detailed prompt for the agent"),

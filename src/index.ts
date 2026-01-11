@@ -61,9 +61,11 @@ import {
   discoverCommandsSync,
   sessionExists,
   createSisyphusTask,
+  createSpawnAgent,
   interactive_bash,
   startTmuxCheck,
   lspManager,
+  createSupermemoryTool,
 } from "./tools";
 import { BackgroundManager } from "./features/background-agent";
 import { SkillMcpManager } from "./features/skill-mcp-manager";
@@ -239,6 +241,11 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
     userCategories: pluginConfig.categories,
     gitMasterConfig: pluginConfig.git_master,
   });
+  const spawnAgent = createSpawnAgent({
+    manager: backgroundManager,
+    client: ctx.client,
+    rateLimitConfig: pluginConfig.rate_limit,
+  });
   const disabledSkills = new Set(pluginConfig.disabled_skills ?? []);
   const systemMcpNames = getSystemMcpServerNames();
   const builtinSkills = createBuiltinSkills().filter((skill) => {
@@ -298,6 +305,10 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
     modelCacheState,
   });
 
+  const supermemory = createSupermemoryTool({
+    apiKey: pluginConfig.supermemory_api_key,
+  });
+
   return {
     ...(googleAuthHooks ? { auth: googleAuthHooks.auth } : {}),
 
@@ -307,10 +318,12 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
       call_omo_agent: callOmoAgent,
       look_at: lookAt,
       sisyphus_task: sisyphusTask,
+      spawn_agent: spawnAgent,
       skill: skillTool,
       skill_mcp: skillMcpTool,
       slashcommand: slashcommandTool,
       interactive_bash,
+      supermemory,
     },
 
     "chat.message": async (input, output) => {

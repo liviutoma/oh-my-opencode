@@ -2241,6 +2241,45 @@
         }
       }
     },
+    "rate_limit": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "defaultConcurrency": {
+          "default": 5,
+          "type": "number",
+          "minimum": 1
+        },
+        "providerLimits": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "modelLimits": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "queueTimeout": {
+          "default": 300000,
+          "type": "number",
+          "minimum": 1000
+        }
+      }
+    },
     "notification": {
       "type": "object",
       "properties": {
@@ -2261,6 +2300,9 @@
           "type": "boolean"
         }
       }
+    },
+    "supermemory_api_key": {
+      "type": "string"
     }
   }
 }

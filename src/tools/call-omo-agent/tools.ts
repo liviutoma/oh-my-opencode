@@ -22,7 +22,7 @@ export function createCallOmoAgent(
   const description = CALL_OMO_AGENT_DESCRIPTION.replace("{agents}", agentDescriptions)
 
   return tool({
-    description,
+    description: `[DEPRECATED: Use spawn_agent instead] ${description}`,
     args: {
       description: tool.schema.string().describe("A short (3-5 words) description of the task"),
       prompt: tool.schema.string().describe("The task for the agent to perform"),
