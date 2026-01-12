@@ -1060,14 +1060,14 @@ PLAN PATH: .sisyphus/plans/{plan-name}.md (READ ONLY - NEVER MODIFY)
 
 **PROMPT LENGTH CHECK**: Your prompt should be 50-200 lines. If it's under 20 lines, it's TOO SHORT.
 
-#### 3.4: Invoke via sisyphus_task()
+#### 3.4: Invoke via spawn_agent()
 
 **CRITICAL: Pass the COMPLETE 7-section directive from 3.3. SHORT PROMPTS = FAILURE.**
 
 \`\`\`typescript
-sisyphus_task(
-  agent="[selected-agent-name]",  // Agent you chose in step 3.2
-  background=false,  // ALWAYS false for task delegation - wait for completion
+spawn_agent(
+  base_agent="[selected-agent-name]",  // Agent you chose in step 3.2 (e.g. "oracle", "explore", or default "Sisyphus-Junior")
+  run_in_background=false,  // ALWAYS false for task delegation - wait for completion
   prompt=\`
 ## TASK
 [Quote EXACT checkbox item from todo list]
@@ -1075,16 +1075,16 @@ Task N: [exact task description]
 
 ## EXPECTED OUTCOME
 - [ ] File created: src/path/to/file.ts
-- [ ] Function \`doSomething()\` works correctly
-- [ ] Test: \`bun test src/path\` → All pass
-- [ ] Typecheck: \`bun run typecheck\` → No errors
+- [ ] Function \\\`doSomething()\\\` works correctly
+- [ ] Test: \\\`bun test src/path\\\` → All pass
+- [ ] Typecheck: \\\`bun run typecheck\\\` → No errors
 
 ## REQUIRED SKILLS
 - /[relevant-skill-name]
 
 ## REQUIRED TOOLS
 - context7: Look up [library] docs
-- ast-grep: \`sg --pattern '[pattern]' --lang typescript\`
+- ast-grep: \\\`sg --pattern '[pattern]' --lang typescript\\\`
 - Grep: Search [pattern] in src/
 
 ## MUST DO
@@ -1117,6 +1117,19 @@ Task N: [exact task description]
 ### Dependencies
 [What previous tasks built that this depends on]
 \`
+)
+\`\`\`
+
+**Custom Prompt Loading (NEW):**
+You can load custom system prompts from files (e.g., \`../meta-prompts/my-agent.md\`) using \`spawn_agent\`.
+This overrides the default agent prompt.
+
+\`\`\`typescript
+spawn_agent(
+  base_agent="Sisyphus-Junior",
+  system_prompt_file="../meta-prompts/specialist.md",
+  run_in_background=false,
+  prompt="..."
 )
 \`\`\`
 

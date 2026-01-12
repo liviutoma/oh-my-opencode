@@ -1,6 +1,6 @@
 import { tool, type PluginInput, type ToolDefinition } from "@opencode-ai/plugin"
-import { existsSync, readdirSync } from "node:fs"
-import { join } from "node:path"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
+import { join, resolve } from "node:path"
 import type { BackgroundManager } from "../../features/background-agent"
 import { RateLimitManager, type ReleaseHandle, type Priority, type RateLimitConfig } from "../../features/rate-limit-manager"
 import type { CategoriesConfig, GitMasterConfig } from "../../config/schema"
@@ -113,7 +113,20 @@ function buildSystemPrompt(
     }
   }
 
-  if (args.system_prompt) {
+  if (args.system_prompt_file) {
+    try {
+      const filePath = resolve(process.cwd(), args.system_prompt_file)
+      if (existsSync(filePath)) {
+        parts.push(readFileSync(filePath, "utf-8"))
+      } else {
+        console.warn(`[SpawnAgent] Prompt file not found: ${filePath}`)
+        if (args.system_prompt) parts.push(args.system_prompt)
+      }
+    } catch (error) {
+      console.warn(`[SpawnAgent] Error reading prompt file: ${error}`)
+      if (args.system_prompt) parts.push(args.system_prompt)
+    }
+  } else if (args.system_prompt) {
     parts.push(args.system_prompt)
   } else if (args.system_prompt_append) {
     parts.push(args.system_prompt_append)
@@ -157,6 +170,10 @@ export function createSpawnAgent(options: SpawnAgentToolOptions): ToolDefinition
         .string()
         .optional()
         .describe("Custom system prompt (replaces default)"),
+      system_prompt_file: tool.schema
+        .string()
+        .optional()
+        .describe("Path to custom system prompt file (overrides system_prompt)"),
       system_prompt_append: tool.schema
         .string()
         .optional()

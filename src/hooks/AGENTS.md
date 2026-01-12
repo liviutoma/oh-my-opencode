@@ -2,43 +2,42 @@
 
 ## OVERVIEW
 
-22+ lifecycle hooks for intercepting/modifying agent behavior. Handles orchestration, recovery, context injection, and safety checks.
+Lifecycle management and event loop orchestration for Sisyphus. Handles tool interception, recursive self-correction, and state-aware recovery.
 
-## STRUCTURE
+## ARCHITECTURE
 
-```
-hooks/
-├── sisyphus-orchestrator/      # MAIN BRAIN (Event loop, Tool use)
-├── ralph-loop/                 # Infinite recursion loop
-├── anthropic-context-window-limit-recovery/ # Token management
-├── session-recovery/           # Error recovery
-├── claude-code-hooks/          # settings.json compat
-└── index.ts                    # Export all
-```
+- **Event-Driven**: Hooks respond to OpenCode events (`session.idle`, `tool.execute.before`, `message.updated`, etc.).
+- **Interception**: `PreToolUse` can block or modify arguments; `PostToolUse` appends system reminders to tool output.
+- **Priority Management**: Hooks are executed in order of registration. Use `disabled_hooks` in config to opt-out.
 
-## HOOK EVENTS
+## CORE COMPONENTS
 
-| Event | Role | Can Block? |
-|-------|------|------------|
-| `PreToolUse` | Validate/Modify input | YES |
-| `PostToolUse` | Context/Warnings | NO |
-| `UserPromptSubmit` | Inject/Block prompt | YES |
-| `Stop` | Idle follow-up | NO |
+### Sisyphus Orchestrator (`sisyphus-orchestrator/`)
+- **Event Loop**: Listens for `session.idle` to drive "Boulder" plan continuation.
+- **Delegation Protocol**: Intercepts `Write`/`Edit` calls by orchestrator to enforce subagent delegation.
+- **Verification**: Automatically appends QA checklists to subagent tool outputs.
+- **Boulder State**: Tracks multi-session progress via `.sisyphus/` directory.
 
-## HOW TO ADD HOOK
+### Ralph Loop (`ralph-loop/`)
+- **Recursive Execution**: Triggers iteration `N+1` if `<promise>DONE</promise>` is missing.
+- **Completion Detection**: Scans transcripts and session messages via API to detect completion tags.
+- **Max Iterations**: Defaults to 100 to prevent runaway infinite loops.
 
-1. Create `src/hooks/my-hook/index.ts`.
-2. Export factory `createMyHook()`.
-3. Return object with event handlers:
-   ```typescript
-   return {
-     PreToolUse: async (t) => { /* logic */ }
-   }
-   ```
-4. Register in `src/hooks/index.ts`.
+### Self-Correction & Recovery
+- **Session Recovery**: Catches `session.error` (aborts, thinking violations) and restores state.
+- **Edit Error Recovery**: Fixes common `Edit` tool failures (context mismatch) automatically.
+- **Preemptive Compaction**: Compresses context at 85% usage to prevent overflow mid-task.
+- **Auto-Resume**: Detects thinking errors and automatically restarts the loop with recovered context.
 
-## PATTERNS
+## ANTI-PATTERNS
 
-- **Persistence**: Use JSON files for session state.
-- **Injection**: Return `{ messages: [...] }` to inject context.
-- **Safety**: Always wrap in try/catch to prevent session crash.
+- **Volatile State**: Session state MUST be persisted to JSON (see `storage.ts` in subdirs) to survive crashes.
+- **Direct Implementations**: Hooks should NOT perform complex tasks; they should inject prompts to guide the agent.
+- **Circular Reminders**: Avoid appending reminders that trigger another hook in an infinite loop.
+- **Context Bloat**: Don't inject massive prompts in every `PostToolUse`; use conditional logic.
+
+## HOW TO DEVELOP
+
+1. **Define Hook**: Implement `handler` for generic events or specific tool hooks.
+2. **Register**: Add factory to `src/hooks/index.ts`.
+3. **Persist**: Use `src/shared/storage.ts` or local `storage.ts` for any cross-event memory.

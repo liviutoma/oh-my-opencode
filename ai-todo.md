@@ -1,0 +1,29 @@
+# AI Todo List
+
+- [x] Generate `src/cli/AGENTS.md` with requested focus and highlights <!-- id: 0 -->
+- [x] Verify the content matches the requirements <!-- id: 1 -->
+- [x] Generate AGENTS.md for `src/hooks/` <!-- id: 2 -->
+- [x] Generate AGENTS.md for `src/tools/` <!-- id: 3 -->
+    - Focus: Intelligent Tools (LSP, AST-Grep, Session), Tool Lifecycle.
+    - Highlights: `spawn_agent` (Unified Orchestration), LSP Server Management, Truncation logic.
+    - Anti-patterns: Infinite outputs (must truncate), Zombie processes (must cleanup).
+- [x] Verify all content matches requirements <!-- id: 4 -->
+- [x] Generate AGENTS.md for `script/` <!-- id: 5 -->
+    - Focus: Build System, CI Scripts, Release Automation.
+    - Highlights: Bun-native scripts (No Make/Bash), Schema generation, Draft release management.
+    - Anti-patterns: Using npm/yarn commands, manual versioning (use CI).
+- [x] Generate AGENTS.md for `src/features/` <!-- id: 6 -->
+    - Focus: Compatibility Layer (Claude Code), Loaders (Skills, MCPs, Commands)
+    - Highlights: Loader priority (Local > Global), Feature toggles, Skill-embedded MCPs
+    - Anti-patterns: Sync loading (must be async), Hardcoded configuration paths
+- [x] Review all generated AGENTS.md files (Root, src/agents, src/hooks, src/auth, src/cli, src/tools, src/features, src/shared, script) and validate against criteria <!-- id: 7 -->
+    - [x] Root AGENTS.md <!-- id: 8 -->
+    - [x] src/agents/AGENTS.md <!-- id: 9 -->
+    - [x] src/hooks/AGENTS.md <!-- id: 10 -->
+    - [x] src/auth/AGENTS.md <!-- id: 11 -->
+    - [x] src/cli/AGENTS.md <!-- id: 12 -->
+    - [x] src/tools/AGENTS.md <!-- id: 13 -->
+    - [x] src/features/AGENTS.md <!-- id: 14 -->
+    - [x] src/shared/AGENTS.md <!-- id: 15 -->
+    - [x] script/AGENTS.md <!-- id: 16 -->
+    - [x] Return a summary report <!-- id: 17 -->

@@ -7,6 +7,7 @@ export interface SpawnAgentArgs {
 
   model?: string
   system_prompt?: string
+  system_prompt_file?: string
   system_prompt_append?: string
 
   tools?: Record<string, boolean>
